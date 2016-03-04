@@ -5,6 +5,9 @@
 #This script is to version two of the genome.
 #currently set up to run on 8 threads
 
+#Software needed
+#fastqc, bowtie2, tophat2, cufflinks, cutadapt
+
 #How to use the script
 #bash test.sh -f \
 #forward_read.fastq \
@@ -310,7 +313,7 @@ cd ${OUTPUTDIR}${samplename}
 
 #use cufflinks to generate FPKM values
 cufflinks \
--g /home/misc00/jmichno/MeeshCM/Data/References/Wm82.a2.v1/Gmax_275_Wm82.a2.v1.gene_exons.gff3 \
+-G /home/misc00/jmichno/MeeshCM/Data/References/Wm82.a2.v1/Gmax_275_Wm82.a2.v1.gene_exons.gff3 \
 -I 20000 \
 --min-intron-length 5 \
 ${OUTPUTDIR}${samplename}/accepted_hits.bam
