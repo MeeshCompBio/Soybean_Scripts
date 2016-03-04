@@ -8,6 +8,8 @@
 #Software needed
 #fastqc, bowtie2, tophat2, cufflinks, cutadapt
 
+#You need to index your reference genome using bowtie2-build command
+
 #How to use the script
 #bash test.sh -f \
 #forward_read.fastq \
