@@ -174,22 +174,22 @@ fi
 
 
 
-# #load and run fastqc module for forward and reverse at the same time
-# if [ $I == 2 ];
-#    then
-#       #Run both fastqc programs at once
-#       fastqc -f fastq -o ${OUTPUTDIR} ${FILE} &
-#       fastqc -f fastq -o ${OUTPUTDIR} ${FILE2} 
-#       wait
-#       echo "Initial FastQC on forward and revese reads worked"
-#    else
-#       fastqc -f fastq -o ${OUTPUTDIR} ${FILE}
-#       echo "Initial FastQC on forward reads worked"
-# fi
+#load and run fastqc module for forward and reverse at the same time
+if [ $I == 2 ];
+   then
+      #Run both fastqc programs at once
+      fastqc -f fastq -o ${OUTPUTDIR} ${FILE} &
+      fastqc -f fastq -o ${OUTPUTDIR} ${FILE2} 
+      wait
+      echo "Initial FastQC on forward and revese reads worked"
+   else
+      fastqc -f fastq -o ${OUTPUTDIR} ${FILE}
+      echo "Initial FastQC on forward reads worked"
+fi
 
-#these adapters are assuming that you are using the Illumina standard library prep
-echo "Starting read and or adapter trimming"
-REVERSEADAPTER2=$(echo AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT | rev | tr ATGC TACG)
+# #these adapters are assuming that you are using the Illumina standard library prep
+# echo "Starting read and or adapter trimming"
+# REVERSEADAPTER2=$(echo AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT | rev | tr ATGC TACG)
 
 if [ $A == "True" ]
     then
@@ -283,45 +283,45 @@ fi
 
 
 
-# if [ $I == 2 ]
-#   then
-#       #run tophat2 to generate the bam file
-#       tophat2 \
-#       -G /home/misc00/jmichno/MeeshCM/Data/References/Wm82.a2.v1/Gmax_275_Wm82.a2.v1.gene_exons.gff3 \
-#       -p 8 \
-#       -i 5 \
-#       -I 20000 \
-#       -o ${OUTPUTDIR}${samplename} \
-#       /home/misc00/jmichno/MeeshCM/Data/References/Wm82.a2.v1/Gmax_275_v2.0 \
-#       ${OUTPUTDIR}${basename}_cutadapt.fastq \
-#       ${OUTPUTDIR}${basename2}_cutadapt.fastq
+if [ $I == 2 ]
+  then
+      #run tophat2 to generate the bam file
+      tophat2 \
+      -G /home/misc00/jmichno/MeeshCM/Data/References/Wm82.a2.v1/Gmax_275_Wm82.a2.v1.gene_exons.gff3 \
+      -p 7 \
+      -i 5 \
+      -I 20000 \
+      -o ${OUTPUTDIR}${samplename} \
+      /home/misc00/jmichno/MeeshCM/Data/References/Wm82.a2.v1/Gmax_275_v2.0 \
+      ${OUTPUTDIR}${basename}_cutadapt.fastq \
+      ${OUTPUTDIR}${basename2}_cutadapt.fastq
 
-#     else
-#       #run tophat2 to generate the bam file
-#       tophat2 \
-#       -G /home/misc00/jmichno/MeeshCM/Data/References/Wm82.a2.v1/Gmax_275_Wm82.a2.v1.gene_exons.gff3 \
-#       -p 8 \
-#       -i 5 \
-#       -I 20000 \
-#       -o ${OUTPUTDIR}${samplename} \
-#       /home/misc00/jmichno/MeeshCM/Data/References/Wm82.a2.v1/Gmax_275_v2.0 \
-#       ${OUTPUTDIR}${basename}_cutadapt.fastq
+    else
+      #run tophat2 to generate the bam file
+      tophat2 \
+      -G /home/misc00/jmichno/MeeshCM/Data/References/Wm82.a2.v1/Gmax_275_Wm82.a2.v1.gene_exons.gff3 \
+      -p 7 \
+      -i 5 \
+      -I 20000 \
+      -o ${OUTPUTDIR}${samplename} \
+      /home/misc00/jmichno/MeeshCM/Data/References/Wm82.a2.v1/Gmax_275_v2.0 \
+      ${OUTPUTDIR}${basename}_cutadapt.fastq
 
-# fi
+fi
 
-# cd ${OUTPUTDIR}${samplename}
+cd ${OUTPUTDIR}${samplename}
 
-# #use cufflinks to generate FPKM values
-# cufflinks \
-# -G /home/misc00/jmichno/MeeshCM/Data/References/Wm82.a2.v1/Gmax_275_Wm82.a2.v1.gene_exons.gff3 \
-# -I 20000 \
-# --min-intron-length 5 \
-# ${OUTPUTDIR}${samplename}/accepted_hits.bam
+#use cufflinks to generate FPKM values
+cufflinks \
+-G /home/misc00/jmichno/MeeshCM/Data/References/Wm82.a2.v1/Gmax_275_Wm82.a2.v1.gene_exons.gff3 \
+-I 20000 \
+--min-intron-length 5 \
+${OUTPUTDIR}${samplename}/accepted_hits.bam
 
-# #rename the files with the sample name in front
-# mv genes.fpkm_tracking "${samplename}_genes.fpkm_tracking"
-# mv isoforms.fpkm_tracking "${samplename}_isoforms.fpkm_tracking"
-# mv skipped.gtf "${samplename}_skipped.gtf"
+#rename the files with the sample name in front
+mv genes.fpkm_tracking "${samplename}_genes.fpkm_tracking"
+mv isoforms.fpkm_tracking "${samplename}_isoforms.fpkm_tracking"
+mv skipped.gtf "${samplename}_skipped.gtf"
 
 
 
