@@ -187,9 +187,9 @@ if [ $I == 2 ];
       echo "Initial FastQC on forward reads worked"
 fi
 
-# #these adapters are assuming that you are using the Illumina standard library prep
-# echo "Starting read and or adapter trimming"
-# REVERSEADAPTER2=$(echo AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT | rev | tr ATGC TACG)
+#these adapters are assuming that you are using the Illumina standard library prep
+echo "Starting read and or adapter trimming"
+REVERSEADAPTER2=$(echo AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT | rev | tr ATGC TACG)
 
 if [ $A == "True" ]
     then
