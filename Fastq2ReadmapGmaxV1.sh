@@ -174,6 +174,8 @@ echo "BWA complete"
 samtools view -bSq 20 ${OUTPUTDIR}bwa${samplename}.sam > ${OUTPUTDIR}bwa${samplename}.bam
 
 #sort the bam file
-samtools sort ${OUTPUTDIR}bwa${samplename}.bam ${OUTPUTDIR}bwa${samplename}.sorted
+samtools sort -o ${OUTPUTDIR}bwa${samplename}.sorted -@ 8 ${OUTPUTDIR}bwa${samplename}.bam 
 samtools index ${OUTPUTDIR}bwa${samplename}.sorted.bam
+
+
 
