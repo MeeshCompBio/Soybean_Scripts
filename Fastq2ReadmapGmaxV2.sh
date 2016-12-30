@@ -211,6 +211,41 @@ if [ $A == "True" ]
 
           fastqc -f fastq ${OUTPUTDIR}/${basename}_cutadapt.fastq
     fi
+    else
+      if [ $I == 2 ]
+        then
+          #load and run cutadapt just searching for standard illumina adapters
+          cutadapt \
+          -b AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT \
+          -B ${REVERSEADAPTER2} \
+          -f fastq \
+          -m 40 \
+          -q 30 \
+          --quality-base=33 \
+          -o ${OUTPUTDIR}/${basename}_cutadapt.fastq \
+          -p ${OUTPUTDIR}/${basename2}_cutadapt.fastq \
+          ${FILE} \
+          ${FILE2} \
+          > ${OUTPUTDIR}/${basename}_cutadapt.log
+
+          #run Fastqc to make sure reads were trimmed
+          fastqc -f fastq ${OUTPUTDIR}/${basename}_cutadapt.fastq &
+          fastqc -f fastq ${OUTPUTDIR}/${basename2}_cutadapt.fastq 
+          wait
+        else
+          #load and run cutadapt just searching for standard illumina adapters
+          cutadapt \
+          -b AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT \
+          -f fastq \
+          -m 40 \
+          -q 30 \
+          --quality-base=33 \
+          -o ${OUTPUTDIR}/${basename}_cutadapt.fastq \
+          ${FILE} \
+          > ${OUTPUTDIR}/${basename}_cutadapt.log
+
+          fastqc -f fastq ${OUTPUTDIR}/${basename}_cutadapt.fastq
+      fi
 fi
 echo "Adapter trimming finished"
 #load and run fastx for low complexity sequences
