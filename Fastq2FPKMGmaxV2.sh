@@ -51,8 +51,9 @@ while getopts hf:r::a::o: flag; do
     case $flag in
       #this is the help command
         h)
-            echo "This is your help information \n
-Usage: test.sh -f forward_read.fastq -r <reverse_read.fastq> -a <adapter> -o output_directory \n"
+            echo "This is your help information:
+                  Usage: 
+                  test.sh -f forward_read.fastq -r <reverse_read.fastq> -a <adapter> -o output_directory \n"
             exit 2
             ;;
         f)
