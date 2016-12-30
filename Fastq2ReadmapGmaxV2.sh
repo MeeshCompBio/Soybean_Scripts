@@ -247,13 +247,7 @@ if [ $A == "True" ]
       fi
 fi
 
-
-
-if [ $A == "True" ]
-    then
-    else
-fi
-echo "Adapter trimming finished"
+"Adapter trimming finished"
 #load and run fastx for low complexity sequences
 
 
