@@ -186,15 +186,15 @@ if [ $A == "True" ]
           -m 40 \
           -q 30 \
           --quality-base=33 \
-          -o ${OUTPUTDIR}${basename}_cutadapt.fastq \
-          -p ${OUTPUTDIR}${basename2}_cutadapt.fastq \
+          -o ${OUTPUTDIR}/${basename}_cutadapt.fastq \
+          -p ${OUTPUTDIR}/${basename2}_cutadapt.fastq \
           ${FILE} \
           ${FILE2} \
-          > ${OUTPUTDIR}${basename}_cutadapt.log
+          > ${OUTPUTDIR}/${basename}_cutadapt.log
 
           #run Fastqc to make sure reads were trimmed
-          fastqc -f fastq ${OUTPUTDIR}${basename}_cutadapt.fastq &
-          fastqc -f fastq ${OUTPUTDIR}${basename2}_cutadapt.fastq 
+          fastqc -f fastq ${OUTPUTDIR}/${basename}_cutadapt.fastq &
+          fastqc -f fastq ${OUTPUTDIR}/${basename2}_cutadapt.fastq 
 
        else
           #load and run cutadapt for single end reads
@@ -205,11 +205,11 @@ if [ $A == "True" ]
           -m 40 \
           -q 30 \
           --quality-base=33 \
-          -o ${OUTPUTDIR}${basename}_cutadapt.fastq \
+          -o ${OUTPUTDIR}/${basename}_cutadapt.fastq \
           ${FILE} \
-          > ${OUTPUTDIR}${basename}_cutadapt.log
+          > ${OUTPUTDIR}/${basename}_cutadapt.log
 
-          fastqc -f fastq ${OUTPUTDIR}${basename}_cutadapt.fastq
+          fastqc -f fastq ${OUTPUTDIR}/${basename}_cutadapt.fastq
     fi
 fi
 echo "Adapter trimming finished"
@@ -224,26 +224,26 @@ if [ $ALIGNER == "bowtie2" ]
       bowtie2 -N 6 -p 8 \
       --rg-id "@RG\tID:wgs_${samplename}" \
       -x /panfs/roc/groups/13/stuparr/shared/References/Gmax.a2.v1/assembly/Gmax_275_v2.0 \
-      -1 ${OUTPUTDIR}${basename}_cutadapt.fastq \
-      -2 ${OUTPUTDIR}${basename2}_cutadapt.fastq \
-      -S ${OUTPUTDIR}bt2${samplename}.sam
+      -1 ${OUTPUTDIR}/${basename}_cutadapt.fastq \
+      -2 ${OUTPUTDIR}/${basename2}_cutadapt.fastq \
+      -S ${OUTPUTDIR}/bt2${samplename}.sam
       #convert the sam file to a bam file
-      samtools view -bSq 20 ${OUTPUTDIR}bt2${samplename}.sam > ${OUTPUTDIR}bt2${samplename}.bam
+      samtools view -bSq 20 ${OUTPUTDIR}/bt2${samplename}.sam > ${OUTPUTDIR}/bt2${samplename}.bam
       #sort and index the bam file
-      samtools sort -o ${OUTPUTDIR}bt2${samplename}.sorted -@ 8 ${OUTPUTDIR}bt2${samplename}.bam 
-      samtools index ${OUTPUTDIR}bt2${samplename}.sorted.bam
+      samtools sort -o ${OUTPUTDIR}/bt2${samplename}.sorted -@ 8 ${OUTPUTDIR}/bt2${samplename}.bam 
+      samtools index ${OUTPUTDIR}/bt2${samplename}.sorted.bam
       echo "bowtie2 alignment complete"
       else
       bowtie2 -N 6 -p 8 \
       --rg-id "@RG\tID:wgs_${samplename}" \
       -x /panfs/roc/groups/13/stuparr/shared/References/Gmax.a2.v1/assembly/Gmax_275_v2.0 \
-      -1 ${OUTPUTDIR}${basename}_cutadapt.fastq \
-      -S ${OUTPUTDIR}bt2${samplename}.sam
+      -1 ${OUTPUTDIR}/${basename}_cutadapt.fastq \
+      -S ${OUTPUTDIR}/bt2${samplename}.sam
       #convert the sam file to a bam file
-      samtools view -bSq 20 ${OUTPUTDIR}bt2${samplename}.sam > ${OUTPUTDIR}bt2${samplename}.bam
+      samtools view -bSq 20 ${OUTPUTDIR}/bt2${samplename}.sam > ${OUTPUTDIR}/bt2${samplename}.bam
       #sort and index the bam file
-      samtools sort -o ${OUTPUTDIR}bt2${samplename}.sorted -@ 8 ${OUTPUTDIR}bt2${samplename}.bam 
-      samtools index ${OUTPUTDIR}bt2${samplename}.sorted.bam
+      samtools sort -o ${OUTPUTDIR}/bt2${samplename}.sorted -@ 8 ${OUTPUTDIR}/bt2${samplename}.bam 
+      samtools index ${OUTPUTDIR}/bt2${samplename}.sorted.bam
       echo "bowtie2 alignment complete"
    fi
    echo"starting bwa alignment"
@@ -253,26 +253,26 @@ if [ $ALIGNER == "bowtie2" ]
       bwa mem -t 8 -w 100 -M -B 6 \
          -R "@RG\tID:wgs_${samplename}\tLB:ES_${samplename}\tSM:WGS_${samplename}\tPL:ILLUMINA" \
          /panfs/roc/groups/13/stuparr/shared/References/Gmax.a2.v1/assembly/Gmax_275_v2.0.fa \
-         ${OUTPUTDIR}${basename}_cutadapt.fastq \
-         ${OUTPUTDIR}${basename2}_cutadapt.fastq  \
-         > ${OUTPUTDIR}bwa${samplename}.sam
+         ${OUTPUTDIR}/${basename}_cutadapt.fastq \
+         ${OUTPUTDIR}/${basename2}_cutadapt.fastq  \
+         > ${OUTPUTDIR}/bwa${samplename}.sam
          echo "BWA alignmentcomplete"
          #convert the sam file to a bam file
-         samtools view -bSq 20 ${OUTPUTDIR}bwa${samplename}.sam > ${OUTPUTDIR}bwa${samplename}.bam
+         samtools view -bSq 20 ${OUTPUTDIR}/bwa${samplename}.sam > ${OUTPUTDIR}/bwa${samplename}.bam
          #sort and index the bam file
-         samtools sort -o ${OUTPUTDIR}bwa${samplename}.sorted -@ 8 ${OUTPUTDIR}bwa${samplename}.bam 
-         samtools index ${OUTPUTDIR}bwa${samplename}.sorted.bam
+         samtools sort -o ${OUTPUTDIR}/bwa${samplename}.sorted -@ 8 ${OUTPUTDIR}/bwa${samplename}.bam 
+         samtools index ${OUTPUTDIR}/bwa${samplename}.sorted.bam
       else
          bwa mem -t 8 -w 100 -M -B 6 \
          -R "@RG\tID:wgs_${samplename}\tLB:ES_${samplename}\tSM:WGS_${samplename}\tPL:ILLUMINA" \
          /panfs/roc/groups/13/stuparr/shared/References/Gmax.a2.v1/assembly/Gmax_275_v2.0.fa \
-         ${OUTPUTDIR}${basename}_cutadapt.fastq \
-         > ${OUTPUTDIR}bwa${samplename}.sam
+         ${OUTPUTDIR}/${basename}_cutadapt.fastq \
+         > ${OUTPUTDIR}/bwa${samplename}.sam
          #convert the sam file to a bam file
-         samtools view -bSq 20 ${OUTPUTDIR}bwa${samplename}.sam > ${OUTPUTDIR}bwa${samplename}.bam
+         samtools view -bSq 20 ${OUTPUTDIR}/bwa${samplename}.sam > ${OUTPUTDIR}/bwa${samplename}.bam
          #sort and index the bam file
-         samtools sort -o ${OUTPUTDIR}bwa${samplename}.sorted -@ 8 ${OUTPUTDIR}bwa${samplename}.bam 
-         samtools index ${OUTPUTDIR}bwa${samplename}.sorted.bam
+         samtools sort -o ${OUTPUTDIR}/bwa${samplename}.sorted -@ 8 ${OUTPUTDIR}/bwa${samplename}.bam 
+         samtools index ${OUTPUTDIR}/bwa${samplename}.sorted.bam
          echo "BWA complete"
    fi
 fi
