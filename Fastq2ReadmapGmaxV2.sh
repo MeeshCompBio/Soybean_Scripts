@@ -169,14 +169,13 @@ fi
 #load and run cutadapt
 echo "Starting read and or adapter trimming"
 
-
+REVERSEADAPTER2=$(echo AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT | rev | tr ATGC TACG)
 if [ $A == "True" ]
     then
     REVERSEADAPTER1=$(echo "GATCGGAAGAGCACACGTCTGAACTCCAGTCAC${ADAPTER}ATCTCGTATGCCGTCTTCTGCTTG" | rev | tr ATGC TACG)
-    REVERSEADAPTER2=$(echo AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT | rev | tr ATGC TACG)
     if [ $I == 2 ]
        then
-          #load and run cutadapt
+          #load and run cutadapt for paired end with adaptor
           cutadapt \
           -b GATCGGAAGAGCACACGTCTGAACTCCAGTCAC${ADAPTER}ATCTCGTATGCCGTCTTCTGCTTG \
           -b AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT \
@@ -197,7 +196,7 @@ if [ $A == "True" ]
           fastqc -f fastq ${OUTPUTDIR}/${basename2}_cutadapt.fastq 
 
        else
-          #load and run cutadapt for single end reads
+          #load and run cutadapt for single end reads with 6bp adaptor
           cutadapt \
           -b GATCGGAAGAGCACACGTCTGAACTCCAGTCAC${ADAPTER}ATCTCGTATGCCGTCTTCTGCTTG \
           -b AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT \
@@ -246,6 +245,13 @@ if [ $A == "True" ]
 
           fastqc -f fastq ${OUTPUTDIR}/${basename}_cutadapt.fastq
       fi
+fi
+
+
+
+if [ $A == "True" ]
+    then
+    else
 fi
 echo "Adapter trimming finished"
 #load and run fastx for low complexity sequences
