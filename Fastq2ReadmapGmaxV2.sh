@@ -30,7 +30,7 @@ set -euo pipefail
 
 
 #use getopts for command line arguments
-while getopts hf:r::a::m::o: flag; do
+while getopts hf:r::a::m::t::o: flag; do
     case $flag in
       #this is the help command
         h)
@@ -40,7 +40,7 @@ while getopts hf:r::a::m::o: flag; do
             that can be easily changed.
 
             Usage: 
-            Fastq2ReadmapGmaxV2.sh -f forward_read.fastq -r <reverse_read.fastq> -a <adapter> -m <use bowtie2 instead of bwa> -o output_directory \n"
+            Fastq2ReadmapGmaxV2.sh -f forward_read.fastq -r <reverse_read.fastq> -a <adapter> -m <use bowtie2 instead of bwa> -t <number of threads, default :2> -o output_directory \n"
             exit 2
             ;;
         f)
@@ -48,6 +48,8 @@ while getopts hf:r::a::m::o: flag; do
             FILE=$OPTARG
             I=1
             A="False"
+            ALIGNER="bwa"
+            THREADS=2
             ;;
         r)
             echo "Reverse read is: $OPTARG";
@@ -62,6 +64,10 @@ while getopts hf:r::a::m::o: flag; do
         m)
             echo "You are opting to use bowtie2 instead of BWA";
             ALIGNER="bowtie2"
+            ;;
+        t)
+            echo "You are opting to use bowtie2 instead of BWA";
+            THREADS=$OPTARG
             ;;
         o)
             echo "everything will be output to this directory: ${OPTARG%/}"
@@ -167,8 +173,7 @@ if [ $I == 2 ]
 fi
 
 #load and run cutadapt
-echo "Starting read and or adapter trimming"
-
+echo "Starting adapter trimming"
 REVERSEADAPTER2=$(echo AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT | rev | tr ATGC TACG)
 if [ $A == "True" ]
     then
@@ -211,6 +216,14 @@ if [ $A == "True" ]
           fastqc -f fastq ${OUTPUTDIR}/${basename}_cutadapt.fastq
     fi
     else
+       continue
+fi
+
+#if no adapter is applied then just run cutadadapt with standard illumina
+#to trim based on quiality scores regardless
+if [ $A == "False" ]
+  then
+  echo "Trimming based on quality scores"
       if [ $I == 2 ]
         then
           #load and run cutadapt just searching for standard illumina adapters
@@ -245,47 +258,20 @@ if [ $A == "True" ]
 
           fastqc -f fastq ${OUTPUTDIR}/${basename}_cutadapt.fastq
       fi
+  else
+    continue
 fi
 
-"Adapter trimming finished"
+echo "Adapter trimming finished"
 #load and run fastx for low complexity sequences
 
-
-if [ $ALIGNER == "bowtie2" ]
-   then
-   echo "starting bowtie2 alignment"
+#this is the default aligner
+if [ $ALIGNER == "bwa" ]
+  then
+  echo "starting bwa alignment"
    if [ $I == 2 ]
       then
-      bowtie2 -N 6 -p 8 \
-      --rg-id "@RG\tID:wgs_${samplename}" \
-      -x /panfs/roc/groups/13/stuparr/shared/References/Gmax.a2.v1/assembly/Gmax_275_v2.0 \
-      -1 ${OUTPUTDIR}/${basename}_cutadapt.fastq \
-      -2 ${OUTPUTDIR}/${basename2}_cutadapt.fastq \
-      -S ${OUTPUTDIR}/bt2${samplename}.sam
-      #convert the sam file to a bam file
-      samtools view -bSq 20 ${OUTPUTDIR}/bt2${samplename}.sam > ${OUTPUTDIR}/bt2${samplename}.bam
-      #sort and index the bam file
-      samtools sort -o ${OUTPUTDIR}/bt2${samplename}.sorted -@ 8 ${OUTPUTDIR}/bt2${samplename}.bam 
-      samtools index ${OUTPUTDIR}/bt2${samplename}.sorted.bam
-      echo "bowtie2 alignment complete"
-      else
-      bowtie2 -N 6 -p 8 \
-      --rg-id "@RG\tID:wgs_${samplename}" \
-      -x /panfs/roc/groups/13/stuparr/shared/References/Gmax.a2.v1/assembly/Gmax_275_v2.0 \
-      -1 ${OUTPUTDIR}/${basename}_cutadapt.fastq \
-      -S ${OUTPUTDIR}/bt2${samplename}.sam
-      #convert the sam file to a bam file
-      samtools view -bSq 20 ${OUTPUTDIR}/bt2${samplename}.sam > ${OUTPUTDIR}/bt2${samplename}.bam
-      #sort and index the bam file
-      samtools sort -o ${OUTPUTDIR}/bt2${samplename}.sorted -@ 8 ${OUTPUTDIR}/bt2${samplename}.bam 
-      samtools index ${OUTPUTDIR}/bt2${samplename}.sorted.bam
-      echo "bowtie2 alignment complete"
-   fi
-   echo"starting bwa alignment"
-   else
-   if [ $I == 2 ]
-      then
-      bwa mem -t 8 -w 100 -M -B 6 \
+      bwa mem -t ${THREADS} -w 100 -M -B 6 \
          -R "@RG\tID:wgs_${samplename}\tLB:ES_${samplename}\tSM:WGS_${samplename}\tPL:ILLUMINA" \
          /panfs/roc/groups/13/stuparr/shared/References/Gmax.a2.v1/assembly/Gmax_275_v2.0.fa \
          ${OUTPUTDIR}/${basename}_cutadapt.fastq \
@@ -295,10 +281,10 @@ if [ $ALIGNER == "bowtie2" ]
          #convert the sam file to a bam file
          samtools view -bSq 20 ${OUTPUTDIR}/bwa${samplename}.sam > ${OUTPUTDIR}/bwa${samplename}.bam
          #sort and index the bam file
-         samtools sort -o ${OUTPUTDIR}/bwa${samplename}.sorted -@ 8 ${OUTPUTDIR}/bwa${samplename}.bam 
+         samtools sort -o ${OUTPUTDIR}/bwa${samplename}.sorted -@ ${THREADS} ${OUTPUTDIR}/bwa${samplename}.bam 
          samtools index ${OUTPUTDIR}/bwa${samplename}.sorted.bam
       else
-         bwa mem -t 8 -w 100 -M -B 6 \
+         bwa mem -t ${THREADS} -w 100 -M -B 6 \
          -R "@RG\tID:wgs_${samplename}\tLB:ES_${samplename}\tSM:WGS_${samplename}\tPL:ILLUMINA" \
          /panfs/roc/groups/13/stuparr/shared/References/Gmax.a2.v1/assembly/Gmax_275_v2.0.fa \
          ${OUTPUTDIR}/${basename}_cutadapt.fastq \
@@ -306,11 +292,50 @@ if [ $ALIGNER == "bowtie2" ]
          #convert the sam file to a bam file
          samtools view -bSq 20 ${OUTPUTDIR}/bwa${samplename}.sam > ${OUTPUTDIR}/bwa${samplename}.bam
          #sort and index the bam file
-         samtools sort -o ${OUTPUTDIR}/bwa${samplename}.sorted -@ 8 ${OUTPUTDIR}/bwa${samplename}.bam 
+         samtools sort -o ${OUTPUTDIR}/bwa${samplename}.sorted -@ ${THREADS} ${OUTPUTDIR}/bwa${samplename}.bam 
          samtools index ${OUTPUTDIR}/bwa${samplename}.sorted.bam
          echo "BWA complete"
+   else
+      continue
    fi
 fi
+
+
+#check if the user is using bowtie
+if [ $ALIGNER == "bowtie2" ]
+   then
+   echo "starting bowtie2 alignment"
+   if [ $I == 2 ]
+      then
+      bowtie2 -N 6 -p ${THREADS} \
+      --rg-id "@RG\tID:wgs_${samplename}" \
+      -x /panfs/roc/groups/13/stuparr/shared/References/Gmax.a2.v1/assembly/Gmax_275_v2.0 \
+      -1 ${OUTPUTDIR}/${basename}_cutadapt.fastq \
+      -2 ${OUTPUTDIR}/${basename2}_cutadapt.fastq \
+      -S ${OUTPUTDIR}/bt2${samplename}.sam
+      #convert the sam file to a bam file
+      samtools view -bSq 20 ${OUTPUTDIR}/bt2${samplename}.sam > ${OUTPUTDIR}/bt2${samplename}.bam
+      #sort and index the bam file
+      samtools sort -o ${OUTPUTDIR}/bt2${samplename}.sorted -@ ${THREADS} ${OUTPUTDIR}/bt2${samplename}.bam 
+      samtools index ${OUTPUTDIR}/bt2${samplename}.sorted.bam
+      echo "bowtie2 alignment complete"
+      else
+      bowtie2 -N 6 -p ${THREADS} \
+      --rg-id "@RG\tID:wgs_${samplename}" \
+      -x /panfs/roc/groups/13/stuparr/shared/References/Gmax.a2.v1/assembly/Gmax_275_v2.0 \
+      -1 ${OUTPUTDIR}/${basename}_cutadapt.fastq \
+      -S ${OUTPUTDIR}/bt2${samplename}.sam
+      #convert the sam file to a bam file
+      samtools view -bSq 20 ${OUTPUTDIR}/bt2${samplename}.sam > ${OUTPUTDIR}/bt2${samplename}.bam
+      #sort and index the bam file
+      samtools sort -o ${OUTPUTDIR}/bt2${samplename}.sorted -@ ${THREADS} ${OUTPUTDIR}/bt2${samplename}.bam 
+      samtools index ${OUTPUTDIR}/bt2${samplename}.sorted.bam
+      echo "bowtie2 alignment complete"
+   fi
+   else
+      continue
+fi
+
 
 
 
