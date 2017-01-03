@@ -73,7 +73,7 @@ while getopts hf:r::a::m::t::o: flag; do
             ALIGNER="bowtie2"
             ;;
         t)
-            echo "You are opting to use bowtie2 instead of BWA";
+            echo "$OPTARG threads will be used";
             THREADS=$OPTARG
             ;;
         o)
