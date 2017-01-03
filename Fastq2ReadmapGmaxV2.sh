@@ -21,7 +21,7 @@ set -euo pipefail
 ###### FOR MSI USE
 #Please modify the module loads commands to the appropritate software numbers
 # module load fastqc
-# module laod bowtie2
+# module load bowtie2
 # module load bwa
 # module load samtools
 # module load bedtools
