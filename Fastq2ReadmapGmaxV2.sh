@@ -35,12 +35,19 @@ while getopts hf:r::a::m::t::o: flag; do
       #this is the help command
         h)
             echo "This is your help information:
+
             This script was designed for use on MSI by the Stupar Lab.
             Some of these file paths are hard coded for use on MSI but
             that can be easily changed.
 
-            Usage: 
-            Fastq2ReadmapGmaxV2.sh -f forward_read.fastq -r <reverse_read.fastq> -a <adapter> -m <use bowtie2 instead of bwa> -t <number of threads, default :2> -o output_directory \n"
+            Usage:
+            Fastq2ReadmapGmaxV2.sh -f forward_read.fastq -r <reverse_read.fastq> -o output_directory 
+            
+            Options:
+                    -a <adapter> :6bp Illumina TruSeq barcode
+                    -m True :If flag is used, then bowtie will be used (default bwa)
+                    -t INT :number of threads (default 2) 
+                    "
             exit 2
             ;;
         f)
@@ -143,7 +150,7 @@ if [ $A == "True" ]
     if [ 6 -eq ${#ADAPTER}  ]; then
         echo "Correct Illumina TRUSEQ barcode length"
     else
-        echo "Adatper length is the wrong size"
+        echo "Adatper length is the wrong size <6bp Illumina TruSeq barcode>"
         exit
     fi
 fi
@@ -158,6 +165,11 @@ fi
 
 #go to Output directory
 cd "${OUTPUTDIR}"
+
+#output everything into a log file for easy error identification
+echo "Your log file will be located in ${OUTPUTDIR}/FQ2RM_${samplename}.log"
+exec > >(tee "${OUTPUTDIR}/FQ2RM_${samplename}.log") 2>&1
+
 
 #load and run fastqc module for forward and reverse at the same time
 if [ $I == 2 ]
@@ -215,8 +227,6 @@ if [ $A == "True" ]
 
           fastqc -f fastq ${OUTPUTDIR}/${basename}_cutadapt.fastq
     fi
-    else
-       continue
 fi
 
 #if no adapter is applied then just run cutadadapt with standard illumina
@@ -258,8 +268,6 @@ if [ $A == "False" ]
 
           fastqc -f fastq ${OUTPUTDIR}/${basename}_cutadapt.fastq
       fi
-  else
-    continue
 fi
 
 echo "Adapter trimming finished"
@@ -295,8 +303,6 @@ if [ $ALIGNER == "bwa" ]
          samtools sort -o ${OUTPUTDIR}/bwa${samplename}.sorted -@ ${THREADS} ${OUTPUTDIR}/bwa${samplename}.bam 
          samtools index ${OUTPUTDIR}/bwa${samplename}.sorted.bam
          echo "BWA complete"
-   else
-      continue
    fi
 fi
 
@@ -307,7 +313,7 @@ if [ $ALIGNER == "bowtie2" ]
    echo "starting bowtie2 alignment"
    if [ $I == 2 ]
       then
-      bowtie2 -N 6 -p ${THREADS} \
+      bowtie2 -p ${THREADS} \
       --rg-id "@RG\tID:wgs_${samplename}" \
       -x /panfs/roc/groups/13/stuparr/shared/References/Gmax.a2.v1/assembly/Gmax_275_v2.0 \
       -1 ${OUTPUTDIR}/${basename}_cutadapt.fastq \
@@ -320,7 +326,7 @@ if [ $ALIGNER == "bowtie2" ]
       samtools index ${OUTPUTDIR}/bt2${samplename}.sorted.bam
       echo "bowtie2 alignment complete"
       else
-      bowtie2 -N 6 -p ${THREADS} \
+      bowtie2 -p ${THREADS} \
       --rg-id "@RG\tID:wgs_${samplename}" \
       -x /panfs/roc/groups/13/stuparr/shared/References/Gmax.a2.v1/assembly/Gmax_275_v2.0 \
       -1 ${OUTPUTDIR}/${basename}_cutadapt.fastq \
@@ -332,8 +338,6 @@ if [ $ALIGNER == "bowtie2" ]
       samtools index ${OUTPUTDIR}/bt2${samplename}.sorted.bam
       echo "bowtie2 alignment complete"
    fi
-   else
-      continue
 fi
 
 
