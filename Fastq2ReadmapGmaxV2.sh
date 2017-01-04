@@ -288,8 +288,10 @@ if [ $ALIGNER == "bwa" ]
          echo "BWA alignmentcomplete"
          #convert the sam file to a bam file
          samtools view -bSq 20 ${OUTPUTDIR}/bwa${samplename}.sam > ${OUTPUTDIR}/bwa${samplename}.bam
+         #we made the bam and no longer need the sam
+         rm ${OUTPUTDIR}/bwa${samplename}.sam
          #sort and index the bam file
-         samtools sort -o ${OUTPUTDIR}/bwa${samplename}.sorted -@ ${THREADS} ${OUTPUTDIR}/bwa${samplename}.bam 
+         samtools sort -@ ${THREADS} ${OUTPUTDIR}/bwa${samplename}.bam -o ${OUTPUTDIR}/bwa${samplename}.sorted
          samtools index ${OUTPUTDIR}/bwa${samplename}.sorted.bam
       else
          bwa mem -t ${THREADS} -w 100 -M -B 6 \
@@ -299,8 +301,10 @@ if [ $ALIGNER == "bwa" ]
          > ${OUTPUTDIR}/bwa${samplename}.sam
          #convert the sam file to a bam file
          samtools view -bSq 20 ${OUTPUTDIR}/bwa${samplename}.sam > ${OUTPUTDIR}/bwa${samplename}.bam
+         #we made the bam and no longer need the sam
+         rm ${OUTPUTDIR}/bwa${samplename}.sam
          #sort and index the bam file
-         samtools sort -o ${OUTPUTDIR}/bwa${samplename}.sorted -@ ${THREADS} ${OUTPUTDIR}/bwa${samplename}.bam 
+         samtools sort  -@ ${THREADS} ${OUTPUTDIR}/bwa${samplename}.bam -o ${OUTPUTDIR}/bwa${samplename}.sorted
          samtools index ${OUTPUTDIR}/bwa${samplename}.sorted.bam
          echo "BWA complete"
    fi
@@ -321,8 +325,10 @@ if [ $ALIGNER == "bowtie2" ]
       -S ${OUTPUTDIR}/bt2${samplename}.sam
       #convert the sam file to a bam file
       samtools view -bSq 20 ${OUTPUTDIR}/bt2${samplename}.sam > ${OUTPUTDIR}/bt2${samplename}.bam
+      #we made the bam and no longer need the sam
+      rm ${OUTPUTDIR}/bwa${samplename}.sam
       #sort and index the bam file
-      samtools sort -o ${OUTPUTDIR}/bt2${samplename}.sorted -@ ${THREADS} ${OUTPUTDIR}/bt2${samplename}.bam 
+      samtools sort -@ ${THREADS} ${OUTPUTDIR}/bt2${samplename}.bam -o ${OUTPUTDIR}/bt2${samplename}.sorted
       samtools index ${OUTPUTDIR}/bt2${samplename}.sorted.bam
       echo "bowtie2 alignment complete"
       else
@@ -333,8 +339,10 @@ if [ $ALIGNER == "bowtie2" ]
       -S ${OUTPUTDIR}/bt2${samplename}.sam
       #convert the sam file to a bam file
       samtools view -bSq 20 ${OUTPUTDIR}/bt2${samplename}.sam > ${OUTPUTDIR}/bt2${samplename}.bam
+      #we made the bam and no longer need the sam
+      rm ${OUTPUTDIR}/bwa${samplename}.sam
       #sort and index the bam file
-      samtools sort -o ${OUTPUTDIR}/bt2${samplename}.sorted -@ ${THREADS} ${OUTPUTDIR}/bt2${samplename}.bam 
+      samtools sort -@ ${THREADS} ${OUTPUTDIR}/bt2${samplename}.bam -o ${OUTPUTDIR}/bt2${samplename}.sorted
       samtools index ${OUTPUTDIR}/bt2${samplename}.sorted.bam
       echo "bowtie2 alignment complete"
    fi
