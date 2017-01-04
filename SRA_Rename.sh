@@ -2,7 +2,7 @@
 set -euo pipefail
 
 #use getopts for command line arguments
-while getopts hf:d::t:: flag; do
+while getopts hf::d::t:: flag; do
     case $flag in
       #this is the help command
         h)
@@ -20,11 +20,13 @@ while getopts hf:d::t:: flag; do
             echo "File to be modified is $OPTARG";
             FILE=$OPTARG
             TEST="False"
-            DIR="False"
+            F="True"
             ;;
         d)
-            echo "running a test instance";
-            DIR="True"
+            echo "Changing all file in your specified directory";
+            DIR="${OPTARG%/}"
+            TEST="False"
+            D="True"
             ;;
         t)
             echo "running a test instance";
@@ -37,22 +39,76 @@ while getopts hf:d::t:: flag; do
     esac
 done
 
-#Check to see that it is a readable file 
-if [ -r $FILE ]
-   then
-   echo "Forward file exists and it readable"
-   else
-   echo "This file is not valid, check to see that is a readable fastq file"
-   exit
-fi
+# if [ $F == "True" ]
+#     then
+#     #Check to see that it is a readable file 
+#     if [ -r $FILE ]
+#        then
+#        echo "Forward file exists and it readable"
+#        else
+#        echo "This file is not valid, check to see that is a readable fastq file"
+#        exit
+#     fi
 
-FILENAME=$(basename "$FILE1")
-POSTFIX=$(echo ${filename} | cut -f2- -d"_")
-NEWNAME=$(head -n1 $FILE | cut -f2 -d"-" | cut -f1 -d":")
+#     FILENAME=$(basename "$FILE")
+#     POSTFIX=$(echo ${FILENAME} | cut -f2- -d"_")
+#     NEWNAME=$(head -n1 $FILE | cut -f2 -d"-" | cut -f1 -d":")
 
-if [ $TEST == "True" ]
+#     if [ $TEST == "True" ]
+#         then
+#         echo "Your file would be renamed: ${NEWNAME}_${POSTFIX} "
+#         else
+#         mv ${FILE} ${NEWNAME}_${POSTFIX} 
+#     fi
+# fi
+
+
+if [ $D == "True" ]
     then
-    echo "$NEWNAME"
+    if [ -d $DIR  ]; 
+        then
+        echo "$DIR is a valid directory"
+        if [ $TEST == "True" ]
+            then
+            for i in $( ls $DIR);
+                do
+                    echo $i
+                    POSTFIX=$(echo ${DIR}/$i | cut -f2- -d"_")
+                    NEWNAME=$(head -n1 ${DIR}/$i | cut -f2 -d"-" | cut -f1 -d":")
+                    echo "Your file would be renamed: ${NEWNAME}_${POSTFIX} "
+                done
+            else
+            for i in $( ls $DIR);
+                do
+                    echo $i
+                    POSTFIX=$(echo ${DIR}/$i | cut -f2- -d"_")
+                    NEWNAME=$(head -n1 ${DIR}/$i | cut -f2 -d"-" | cut -f1 -d":")
+                    mv ${DIR}/${i} ${DIR}/${NEWNAME}_${POSTFIX}
+                done
+        fi
     else
-    mv ${FILE} ${NEWNAME}${POSTFIX} 
+        echo "$DIR is not directory"
+        exit
+    fi
 fi
+
+
+#     if [ $TEST == "True" ]
+#         then
+#         for i in $( ls $DIR);
+#             do
+#                 echo $i
+#                 POSTFIX=$(echo ${DIR}/$i | cut -f2- -d"_")
+#                 NEWNAME=$(head -n1 ${DIR}/$i | cut -f2 -d"-" | cut -f1 -d":")
+#                 echo "Your file would be renamed: ${NEWNAME}_${POSTFIX} "
+#             done
+#         else
+#         for i in $( ls $DIR);
+#             do
+#                 echo $i
+#                 POSTFIX=$(echo ${DIR}/$i | cut -f2- -d"_")
+#                 NEWNAME=$(head -n1 ${DIR}/$i | cut -f2 -d"-" | cut -f1 -d":")
+#                 mv ${DIR}/${i} ${DIR}/${NEWNAME}_${POSTFIX}
+#             done
+#     fi
+# fi
