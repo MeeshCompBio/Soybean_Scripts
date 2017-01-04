@@ -1,9 +1,8 @@
 #!/bin/bash
-
 set -euo pipefail
 
 #use getopts for command line arguments
-while getopts hf:t::o: flag; do
+while getopts hf:d::t:: flag; do
     case $flag in
       #this is the help command
         h)
