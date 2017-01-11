@@ -291,7 +291,7 @@ if [ $ALIGNER == "bwa" ]
          #we made the bam and no longer need the sam
          rm ${OUTPUTDIR}/bwa${samplename}.sam
          #sort and index the bam file
-         samtools sort -@ ${THREADS} ${OUTPUTDIR}/bwa${samplename}.bam -o ${OUTPUTDIR}/bwa${samplename}.sorted
+         samtools sort -@ ${THREADS} -m 2500M ${OUTPUTDIR}/bwa${samplename}.bam ${OUTPUTDIR}/bwa${samplename}.sorted
          samtools index ${OUTPUTDIR}/bwa${samplename}.sorted.bam
       else
          bwa mem -t ${THREADS} -w 100 -M -B 6 \
@@ -304,7 +304,7 @@ if [ $ALIGNER == "bwa" ]
          #we made the bam and no longer need the sam
          rm ${OUTPUTDIR}/bwa${samplename}.sam
          #sort and index the bam file
-         samtools sort  -@ ${THREADS} ${OUTPUTDIR}/bwa${samplename}.bam -o ${OUTPUTDIR}/bwa${samplename}.sorted
+         samtools sort -@ ${THREADS} -m 2500M ${OUTPUTDIR}/bwa${samplename}.bam ${OUTPUTDIR}/bwa${samplename}.sorted
          samtools index ${OUTPUTDIR}/bwa${samplename}.sorted.bam
          echo "BWA complete"
    fi
@@ -328,7 +328,7 @@ if [ $ALIGNER == "bowtie2" ]
       #we made the bam and no longer need the sam
       rm ${OUTPUTDIR}/bwa${samplename}.sam
       #sort and index the bam file
-      samtools sort -@ ${THREADS} ${OUTPUTDIR}/bt2${samplename}.bam -o ${OUTPUTDIR}/bt2${samplename}.sorted
+      samtools sort -@ ${THREADS} -m 2500M ${OUTPUTDIR}/bt2${samplename}.bam ${OUTPUTDIR}/bt2${samplename}.sorted
       samtools index ${OUTPUTDIR}/bt2${samplename}.sorted.bam
       echo "bowtie2 alignment complete"
       else
@@ -342,7 +342,7 @@ if [ $ALIGNER == "bowtie2" ]
       #we made the bam and no longer need the sam
       rm ${OUTPUTDIR}/bwa${samplename}.sam
       #sort and index the bam file
-      samtools sort -@ ${THREADS} ${OUTPUTDIR}/bt2${samplename}.bam -o ${OUTPUTDIR}/bt2${samplename}.sorted
+      samtools sort -@ ${THREADS} -m 2500M ${OUTPUTDIR}/bt2${samplename}.bam ${OUTPUTDIR}/bt2${samplename}.sorted
       samtools index ${OUTPUTDIR}/bt2${samplename}.sorted.bam
       echo "bowtie2 alignment complete"
    fi
