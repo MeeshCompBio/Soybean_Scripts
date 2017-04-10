@@ -89,7 +89,9 @@ fi
 #grab the header from a pre-parsed file to save time
 $(grep "#" $HEADER > $OUTPUT.vcf)
 #give a warning so they don't think it hangs
-echo "Searching through VCF file, this can take up to five minutes"
+echo "Searching through VCF file, this can take up to:
+        5 minutes for the 106
+        30 seconds for the NAM"
 
 #grep by chromosome since it is faster then filter based on pos using awk
 $(grep -e "Chr$CHROM"  $FILE | awk -v start="$START" -v stop="$STOP" '$2 >= start && $2 <= stop' >> $OUTPUT.vcf)
