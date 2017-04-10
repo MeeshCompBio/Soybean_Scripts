@@ -17,7 +17,7 @@ while getopts hc:s:t:f::o: flag; do
             VCFquery.sh -c 01 -s 1234 -t 5678  -o myfile
             
             Options:
-                    -c Chrmosome to use <only need a TWO digit number 01-20>
+                    -c Chromosome to use <only need a TWO digit number 01-20>
                     -s start position (number)
                     -t stop position (number)
                     -f which lines to search, use wither 106 or NAM (106 is default)
