@@ -12,12 +12,12 @@ while getopts hc:s:t:f::o: flag; do
             This script was designed for use on MSI by the Stupar Lab.
             The VCF file paths are hardcoded to a public directory
             Usage:
-            VCFquery.sh -c Chromosome -s start_position -t stop position  -o output_prefix
+            VCFquery.sh -c Chromosome -s start_position -t stop_position  -o output_prefix
             Ex:
             VCFquery.sh -c 01 -s 1234 -t 5678  -o myfile
             
             Options:
-                    -c Chrmosome to use <only need a TWO digit number 01-20>
+                    -c Chromosome to use <only need a TWO digit number 01-20>
                     -s start position (number)
                     -t stop position (number)
                     -f which lines to search, use wither 106 or NAM (106 is default)
