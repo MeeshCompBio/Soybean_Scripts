@@ -21,7 +21,7 @@ Once in your desired directory, you can then clone this repository
 ### VCFquery.sh
 This is a bash script for Stupar lab members to access variant calls and indels for specific regions of the genome. Use the -h option to get more information on the options and how to run the script. Currently I have indels and variants called for the 106 Genomes and the NAM parent population.
 
-`bash <path/to/script/>VCFquery.sh`
+`bash <path/to/script/>VCFquery.sh -h`
 
 
 
