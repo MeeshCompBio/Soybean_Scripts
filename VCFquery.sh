@@ -19,9 +19,8 @@ while getopts hc:s:t:f::o: flag; do
             Options:
                     -c Chrmosome to use <only need a TWO digit number 01-20>
                     -s start position (number)
-                    -t True :If flag is used, then bowtie will be used (default bwa)
-                    -f which lines to searc, use wither 106 or NAM (106 is default)
-                    -t top position (number)
+                    -t stop position (number)
+                    -f which lines to search, use wither 106 or NAM (106 is default)
                     -o output file prefix, what you want to file to be called 
                         without an extension
                     "
@@ -30,8 +29,9 @@ while getopts hc:s:t:f::o: flag; do
         c)
             echo " Looking for: Chr$OPTARG";
             CHROM=$OPTARG
-            FILE="/mnt/d/NAMVCF/NAM_Parent_Playpus.vcf"
-            HEADER="/mnt/d/NAMVCF/PlatHeaders.vcf"
+            FILE="/panfs/roc/groups/13/stuparr/shared/VariantCalls/106_Genomes_Platypus.vcf"
+            HEADER="/panfs/roc/groups/13/stuparr/shared/VariantCalls/106_Genomes_Headers.vcf"
+            TYPE="106"
             ;;
         s)
             echo "Start postion is: $OPTARG";
@@ -76,14 +76,14 @@ if ! [[ $STOP =~ $NUM ]] ; then
    echo "error: you must use a number for stop postion (-t)" >&2; exit 1
 fi
 
-if [ $START >= $STOP ] ; then
+if [ $START -gt $STOP ] ; then
    echo "error: your start position is larger than your stop" >&2; exit 1
 fi
 
 if [ $TYPE == "NAM" ]
     then
-    FILE="/mnt/d/NAMVCF/NAM_Parent_Playpus.vcf"
-    HEADER="/mnt/d/NAMVCF/PlatHeaders.vcf"
+    FILE="/panfs/roc/groups/13/stuparr/shared/VariantCalls/NAM_Parent_Platypus.vcf"
+    HEADER="/panfs/roc/groups/13/stuparr/shared/VariantCalls/NAM_Parent_Headers.vcf"
 fi
 
 #grab the header from a pre-parsed file to save time
