@@ -12,7 +12,7 @@ while getopts hc:s:t:f::o: flag; do
             This script was designed for use on MSI by the Stupar Lab.
             The VCF file paths are hardcoded to a public directory
             Usage:
-            VCFquery.sh -c Chromosome -s start_position -t stop position  -o output_prefix
+            VCFquery.sh -c Chromosome -s start_position -t stop_position  -o output_prefix
             Ex:
             VCFquery.sh -c 01 -s 1234 -t 5678  -o myfile
             
