@@ -2,14 +2,8 @@
 
 #This script takes in your forward reads, reverse reads, 6bp adapter, and output directory and returns
 ##all intermitant files with a sorted bam being the final output
-#This script is to version one of the genome.
+#This script is to version two of the genome.
 
-#How to use the script
-#bash Unicon_Fastq2ReadmapGmaxV1.sh \
-#/home/stuparr/michnoj0/Scratch/FNPipeline/FNseq**/*  \
-#/home/stuparr/michnoj0/Scratch/FNPipeline/FNseq**/*  \
-#NNNNNN \
-#/home/stuparr/michnoj0/Scratch/FNPipeline/FNseq**/
 
 set -euo pipefail
 #use shebang to indicate the path to the interpretor used to execute this script
