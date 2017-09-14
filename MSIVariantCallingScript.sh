@@ -1,4 +1,7 @@
 #!/bin/bash
+"""Unified Genotype is no longer supported or reccommended by the broad
+        use Haplotype Caller instead""
+
 """This is an example script I used to call variants in soy on the MSI servers""
 
 #PBS -l walltime=8:00:00,nodes=1:ppn=24,mem=62gb
