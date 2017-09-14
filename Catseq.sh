@@ -4,6 +4,10 @@
 #, the output directory, and the sequencing adapter
 #and combine all the forward and reverse reads into two files
 
+#This script was usefil back in the day when they did not combine
+    #seqeuncing files from differnt lanes into one file, but that is 
+    #now the norm so this script is not as usefule as it once was
+
 
 set -euo pipefail
 
