@@ -13,18 +13,20 @@ set -euo pipefail
 #If any command in a pipeline fails, that return code will be used as the return code of the whole pipeline.
 
 ###### FOR MSI USE
-#Please modify the module loads commands to the appropritate software numbers
+#Please modify the module loads commands to the appropritate software versions
 # module load fastqc
 # module load bowtie2
 # module load bwa
-# module load samtools
+# module load samtools/1.5
 # module load bedtools
 # module load fastqc
 # module load cutadapt
-
+# module load java
+# SILENT_JAVA_OPTIONS="$_JAVA_OPTIONS"
+# unset _JAVA_OPTIONS
 
 #use getopts for command line arguments
-while getopts hf:r::a::m::t::o: flag; do
+while getopts hf:r::a::m::t::u::o: flag; do
     case $flag in
       #this is the help command
         h)
@@ -40,7 +42,8 @@ while getopts hf:r::a::m::t::o: flag; do
             Options:
                     -a <adapter> :6bp Illumina TruSeq barcode
                     -m True :If flag is used, then bowtie will be used (default bwa)
-                    -t INT :number of threads (default 2) 
+                    -t INT :number of threads (default 2)
+                    -u Set the location to your .fa reference file
                     "
             exit 2
             ;;
@@ -51,6 +54,7 @@ while getopts hf:r::a::m::t::o: flag; do
             A="False"
             ALIGNER="bwa"
             THREADS=2
+            REFERENCE="/panfs/roc/groups/13/stuparr/shared/References/Gmax.a2.v1/assembly/Gmax_275_v2.0.fa"
             ;;
         r)
             echo "Reverse read is: $OPTARG";
@@ -69,6 +73,10 @@ while getopts hf:r::a::m::t::o: flag; do
         t)
             echo "$OPTARG threads will be used";
             THREADS=$OPTARG
+            ;;
+        u)
+            echo "$OPTARG is your reference .fa location";
+            REFERENCE=$OPTARG
             ;;
         o)
             echo "everything will be output to this directory: ${OPTARG%/}"
@@ -118,6 +126,14 @@ if [ -r $FILE ]
    echo "Forward file exists and it readable"
    else
    echo "This file is not valid, check to see that is a readable fastq file"
+   exit
+fi
+
+if [ -r $REFERENCE ]
+   then
+   echo "Reference fasta file is readable"
+   else
+   echo "This file is not valid, check to see that is a readable fasta file"
    exit
 fi
 
@@ -265,7 +281,7 @@ if [ $A == "False" ]
 fi
 
 echo "Adapter trimming finished"
-#load and run fastx for low complexity sequences
+
 
 #this is the default aligner
 if [ $ALIGNER == "bwa" ]
@@ -273,36 +289,50 @@ if [ $ALIGNER == "bwa" ]
   echo "starting bwa alignment"
    if [ $I == 2 ]
       then
-      bwa mem -t ${THREADS} -w 100 -M -B 6 \
+      bwa mem -t ${THREADS} -k 8 -r 1.0 -M -T 85 \
          -R "@RG\tID:wgs_${samplename}\tLB:ES_${samplename}\tSM:WGS_${samplename}\tPL:ILLUMINA" \
-         /panfs/roc/groups/13/stuparr/shared/References/Gmax.a2.v1/assembly/Gmax_275_v2.0.fa \
+         ${REFERENCE} \
          ${OUTPUTDIR}/${basename}_cutadapt.fastq \
          ${OUTPUTDIR}/${basename2}_cutadapt.fastq  \
          > ${OUTPUTDIR}/bwa${samplename}.sam
          echo "BWA alignmentcomplete"
          #convert the sam file to a bam file
-         samtools view -bSq 20 ${OUTPUTDIR}/bwa${samplename}.sam > ${OUTPUTDIR}/bwa${samplename}.bam
+         samtools view -@ ${THREADS} -bSq 20 ${OUTPUTDIR}/bwa${samplename}.sam > ${OUTPUTDIR}/bwa${samplename}.bam
          #we made the bam and no longer need the sam
          rm ${OUTPUTDIR}/bwa${samplename}.sam
          #sort and index the bam file
-         samtools sort -@ ${THREADS} -m 800M ${OUTPUTDIR}/bwa${samplename}.bam ${OUTPUTDIR}/bwa${samplename}.sorted
+         samtools sort -@ ${THREADS} -m 800M -T ${samplename} -o ${OUTPUTDIR}/bwa${samplename}.sorted.bam ${OUTPUTDIR}/bwa${samplename}.bam 
          #don't need the original bam since he now have a sorted version of it
          rm ${OUTPUTDIR}/bwa${samplename}.bam
-         samtools index ${OUTPUTDIR}/bwa${samplename}.sorted.bam
+         samtools index -@ ${THREADS} ${OUTPUTDIR}/bwa${samplename}.sorted.bam
+         #Mark duplicate reads
+         java -jar -Xmx12g \
+         /panfs/roc/groups/13/stuparr/mich0391/Software/picard/build/libs/picard.jar \
+         MarkDuplicates I=bwa${samplename}.sorted.bam \
+         O=bwa${samplename}_sorted_dedupped.bam \
+         CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT \
+         M=bwa${samplename}.output.metrics
       else
-         bwa mem -t ${THREADS} -w 100 -M -B 6 \
+         bwa mem -t ${THREADS} -k 8 -r 1.0 -M -T 85 \
          -R "@RG\tID:wgs_${samplename}\tLB:ES_${samplename}\tSM:WGS_${samplename}\tPL:ILLUMINA" \
-         /panfs/roc/groups/13/stuparr/shared/References/Gmax.a2.v1/assembly/Gmax_275_v2.0.fa \
+         ${REFERENCE} \
          ${OUTPUTDIR}/${basename}_cutadapt.fastq \
          > ${OUTPUTDIR}/bwa${samplename}.sam
          #convert the sam file to a bam file
-         samtools view -bSq 20 ${OUTPUTDIR}/bwa${samplename}.sam > ${OUTPUTDIR}/bwa${samplename}.bam
+         samtools view -@ ${THREADS} -bSq 20 ${OUTPUTDIR}/bwa${samplename}.sam > ${OUTPUTDIR}/bwa${samplename}.bam
          #we made the bam and no longer need the sam
          rm ${OUTPUTDIR}/bwa${samplename}.sam
          #sort and index the bam file
-         samtools sort -@ ${THREADS} -m 800M ${OUTPUTDIR}/bwa${samplename}.bam ${OUTPUTDIR}/bwa${samplename}.sorted
+         samtools sort -@ ${THREADS} -m 800M -T ${samplename} -o ${OUTPUTDIR}/bwa${samplename}.sorted.bam ${OUTPUTDIR}/bwa${samplename}.bam
          rm ${OUTPUTDIR}/bwa${samplename}.bam
-         samtools index ${OUTPUTDIR}/bwa${samplename}.sorted.bam
+         samtools index -@ ${THREADS} ${OUTPUTDIR}/bwa${samplename}.sorted.bam
+         #Mark duplicate reads
+         java -jar -Xmx12g \
+         /panfs/roc/groups/13/stuparr/mich0391/Software/picard/build/libs/picard.jar \
+         MarkDuplicates I=bwa${samplename}.sorted.bam \
+         O=bwa${samplename}_sorted_dedupped.bam \
+         CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT \
+         M=bwa${samplename}.output.metrics
          echo "BWA complete"
    fi
 fi
