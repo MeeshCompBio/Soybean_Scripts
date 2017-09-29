@@ -306,12 +306,12 @@ if [ $ALIGNER == "bwa" ]
          rm ${OUTPUTDIR}/bwa${samplename}.bam
          samtools index -@ ${THREADS} ${OUTPUTDIR}/bwa${samplename}.sorted.bam
          #Mark duplicate reads
-         java -jar -Xmx12g \
-         /panfs/roc/groups/13/stuparr/mich0391/Software/picard/build/libs/picard.jar \
-         MarkDuplicates I=bwa${samplename}.sorted.bam \
-         O=bwa${samplename}_sorted_dedupped.bam \
-         CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT \
-         M=bwa${samplename}.output.metrics
+         #java -jar -Xmx12g \
+         #/panfs/roc/groups/13/stuparr/mich0391/Software/picard/build/libs/picard.jar \
+         #MarkDuplicates I=bwa${samplename}.sorted.bam \
+         #O=bwa${samplename}_sorted_dedupped.bam \
+         #CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT \
+         #M=bwa${samplename}.output.metrics
       else
          bwa mem -t ${THREADS} -k 8 -r 1.0 -M -T 85 \
          -R "@RG\tID:wgs_${samplename}\tLB:ES_${samplename}\tSM:WGS_${samplename}\tPL:ILLUMINA" \
@@ -327,12 +327,12 @@ if [ $ALIGNER == "bwa" ]
          rm ${OUTPUTDIR}/bwa${samplename}.bam
          samtools index -@ ${THREADS} ${OUTPUTDIR}/bwa${samplename}.sorted.bam
          #Mark duplicate reads
-         java -jar -Xmx12g \
-         /panfs/roc/groups/13/stuparr/mich0391/Software/picard/build/libs/picard.jar \
-         MarkDuplicates I=bwa${samplename}.sorted.bam \
-         O=bwa${samplename}_sorted_dedupped.bam \
-         CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT \
-         M=bwa${samplename}.output.metrics
+         #java -jar -Xmx12g \
+         #/panfs/roc/groups/13/stuparr/mich0391/Software/picard/build/libs/picard.jar \
+         #MarkDuplicates I=bwa${samplename}.sorted.bam \
+         #O=bwa${samplename}_sorted_dedupped.bam \
+         #CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT \
+         #M=bwa${samplename}.output.metrics
          echo "BWA complete"
    fi
 fi
