@@ -226,7 +226,7 @@ cd "${OUTPUTDIR}"
 
 #output everything into a log file for easy error identification
 echo "Your log file will be located in ${OUTPUTDIR}/FQ2RM_${samplename}.log"
-exec > >(tee "${OUTPUTDIR}/FQ2RM_${samplename}.log") 2>&1
+exec > >(tee "${OUTPUTDIR}/FQ2FPKM_${samplename}.log") 2>&1
 
 
 #load and run fastqc module for forward and reverse at the same time
