@@ -28,7 +28,7 @@ set -euo pipefail
 #use getopts for command line arguments
 while getopts hf:r::a::m::t::u::s:g:o: flag; do
     case $flag in
-      #this is the help command
+      # this is the help command
         h)
             echo "This is your help information:
 
@@ -37,13 +37,21 @@ while getopts hf:r::a::m::t::u::s:g:o: flag; do
             can be easily changed using parameters.
 
             Usage:
-            Fastq2ReadmapGmaxV2.sh -f forward_read.fastq -r <reverse_read.fastq> -o output_directory 
+            Fastq2FPKMV3.sh -f forward_read.fastq -r <reverse_read.fastq> -o output_directory 
             
+            Version: 1.0
+
             Options:
-                    -a <adapter> :6bp Illumina TruSeq barcode
-                    -m True :If flag is used, then bowtie will be used (default bwa)
-                    -t INT :number of threads (default 2)
-                    -u Set the location to your .fa reference file
+                    -a Trimmomatic adapter file name:
+                        must be located in Trimmomatic/adapter directory.
+                    -m True :If flag is set to 'True', then hisat2 will
+                        be used (default STAR).
+                    -t INT :number of threads (default 2).
+                    -u Set the location to your STAR index DIR or .fa
+                        reference file for HISAT2.
+                    -s Path to trimmomatic DIR.
+                    -g Path to your genomes GFF file.
+                    -o output DIR.
                     "
             exit 2
             ;;
@@ -54,6 +62,8 @@ while getopts hf:r::a::m::t::u::s:g:o: flag; do
             A="False"
             ALIGNER="STAR"
             THREADS=2
+            # hard coded paths are for me, will be overwritten
+                # if other users use the corresponding flag.
             REFERENCE="/panfs/roc/groups/13/stuparr/shared/References/Gmax.a2.v1/assembly/Gmax_275_v2.0.fa"
             TRIMMOMATIC="/panfs/roc/groups/13/stuparr/mich0391/Software/Trimmomatic-0.36"
             GFF="/panfs/roc/groups/13/stuparr/shared/References/Gmax.a2.v1/annotation/"
@@ -66,11 +76,11 @@ while getopts hf:r::a::m::t::u::s:g:o: flag; do
         a)
             echo "Adapter sequence is: $OPTARG";
             ADAPTER=$OPTARG
-            A = "True"
+            A="True"
             ;;
         m)
             echo "You are opting to use HISAT2 instead of STAR";
-            ALIGNER="bowtie2"
+            ALIGNER="HISAT2"
             ;;
         t)
             echo "$OPTARG threads will be used";
@@ -150,6 +160,7 @@ if [ $REFERENCE == "STAR" ]
     fi
     else
         if [ -r $REFERENCE ]
+            then
             echo "Reference .fa file is readable"
         else
             echo "Reference .fa file is not readable"
@@ -194,10 +205,10 @@ fi
 ####change this
 if [ $A == "True" ]
     then
-    if [ 6 -eq ${#ADAPTER}  ]; then
-        echo "Correct Illumina TRUSEQ barcode length"
+    if [ -r ${TRIMMOMATIC}/adapters/${ADAPTER} ]; then
+        echo "Trimmomatic adaptor file is readable"
     else
-        echo "Adatper length is the wrong size <6bp Illumina TruSeq barcode>"
+        echo "Error: make sure adaptor file in in trimomatic/adapter DIR"
         exit
     fi
 fi
@@ -226,12 +237,11 @@ if [ $I == 2 ]
         fastqc -f fastq -o ${OUTPUTDIR} \
         {1} \
         ::: ${FILE} ${FILE2}
-    else
-        fastqc -f fastq -o ${OUTPUTDIR} ${FILE}
-        echo "Initial FastQC on forward reads worked"
+else
+    fastqc -f fastq -o ${OUTPUTDIR} ${FILE}
+    echo "Initial FastQC on forward reads worked"
 fi
 
-SILENT_JAVA_OPTIONS="$_JAVA_OPTIONS"
 unset _JAVA_OPTIONS
 
 #load and run cutadapt
@@ -250,7 +260,7 @@ if [ $A == "True" ]
             ${OUTPUTDIR}/${basename}_trimmomatic_unpaired.fastq \
             ${OUTPUTDIR}/${basename2}_trimmomatic.fastq \
             ${OUTPUTDIR}/${basename2}_trimmomatic_unpaired.fastq \
-            ILLUMINACLIP:${TRIMMOMATIC}/${ADAPTER}:2:30:10:4 \
+            ILLUMINACLIP:${TRIMMOMATIC}/adapters/${ADAPTER}:2:30:10:4 \
             LEADING:3 \
             TRAILING:3 \
             SLIDINGWINDOW:5:20 \
@@ -260,19 +270,18 @@ if [ $A == "True" ]
             fastqc -f fastq -o ${OUTPUTDIR} \
             {1} \
             ::: ${OUTPUTDIR}/${basename}_trimmomatic.fastq ${OUTPUTDIR}/${basename2}_trimmomatic.fastq
+    else
+        java -Xmx${THREADS}G -jar ${TRIMMOMATIC}/trimmomatic-0.36.jar SE \
+        ${FILE} \
+        -threads ${THREADS} \
+        ${OUTPUTDIR}/${basename}_trimmomatic.fastq \
+        ILLUMINACLIP:${TRIMMOMATIC}/${ADAPTER}:2:30:10:4 \
+        LEADING:3 \
+        TRAILING:3 \
+        SLIDINGWINDOW:5:20 \
+        MINLEN:40
 
-        else
-            java -Xmx${THREADS}G -jar ${TRIMMOMATIC}/trimmomatic-0.36.jar SE \
-            ${FILE} \
-            -threads ${THREADS} \
-            ${OUTPUTDIR}/${basename}_trimmomatic.fastq \
-            ILLUMINACLIP:${TRIMMOMATIC}/${ADAPTER}:2:30:10:4 \
-            LEADING:3 \
-            TRAILING:3 \
-            SLIDINGWINDOW:5:20 \
-            MINLEN:40
-
-            fastqc -f fastq ${OUTPUTDIR}/${basename}_trimmomatic.fastq
+        fastqc -f fastq ${OUTPUTDIR}/${basename}_trimmomatic.fastq
     fi
 fi
 
@@ -303,20 +312,20 @@ if [ $A == "False" ]
         fastqc -f fastq -o ${OUTPUTDIR} \
         {1} \
         ::: ${OUTPUTDIR}/${basename}_trimmomatic.fastq ${OUTPUTDIR}/${basename2}_trimmomatic.fastq
-        else
-            #load and run cutadapt just searching for standard illumina adapters
-            java -Xmx${THREADS}G -jar ${TRIMMOMATIC}/trimmomatic-0.36.jar \
-            SE \
-            -threads ${THREADS} \
-            ${FILE} \
-            ${OUTPUTDIR}/${basename}_trimmomatic.fastq \
-            LEADING:3 \
-            TRAILING:3 \
-            SLIDINGWINDOW:5:20 \
-            MINLEN:40
+    else
+        #load and run cutadapt just searching for standard illumina adapters
+        java -Xmx${THREADS}G -jar ${TRIMMOMATIC}/trimmomatic-0.36.jar \
+        SE \
+        -threads ${THREADS} \
+        ${FILE} \
+        ${OUTPUTDIR}/${basename}_trimmomatic.fastq \
+        LEADING:3 \
+        TRAILING:3 \
+        SLIDINGWINDOW:5:20 \
+        MINLEN:40
 
-            fastqc -f fastq ${OUTPUTDIR}/${basename}_trimmomatic.fastq
-      fi
+        fastqc -f fastq ${OUTPUTDIR}/${basename}_trimmomatic.fastq
+    fi
 fi
 
 echo "Adapter trimming finished"
@@ -339,77 +348,113 @@ if [ $ALIGNER == "STAR" ]
         --readFilesIn ${OUTPUTDIR}/${basename}_trimmomatic.fastq ${OUTPUTDIR}/${basename2}_trimmomatic.fastq \
         --outFileNamePrefix STAR_${samplename}
         #convert the sam file to a bam file
-        samtools view -@ ${THREADS} -bSq 20 ${OUTPUTDIR}/STAR_${samplename}.sam > ${OUTPUTDIR}/STAR_${samplename}.bam
+        samtools view -@ ${THREADS} -bSq 20 ${OUTPUTDIR}/STAR_${samplename}Aligned.out.sam > ${OUTPUTDIR}/STAR_${samplename}.bam
         #we made the bam and no longer need the sam
-        rm ${OUTPUTDIR}/STAR_${samplename}.sam
+        rm STAR_${samplename}Aligned.out.sam
         #sort and index the bam file
         samtools sort -@ ${THREADS} -m 800M -T ${samplename} -o ${OUTPUTDIR}/STAR_${samplename}.sorted.bam ${OUTPUTDIR}/STAR_${samplename}.bam
         rm ${OUTPUTDIR}/STAR_${samplename}.bam
         samtools index ${OUTPUTDIR}/STAR_${samplename}.sorted.bam
         echo "STAR complete"
-   fi
-        else
-            STAR \
-            --runThreadN ${THREADS} \
-            --genomeDir ${REFERENCE} \
-            --sjdbGTFfile ${GFF} \
-            --sjdbGTFtagExonParentTranscript Parent \
-            --sjdbGTFfeatureExon CDS \
-            --twopassMode Basic \
-            --outSAMstrandField intronMotif \
-            --readFilesIn ${OUTPUTDIR}/${basename}_trimmomatic.fastq \
-            --outFileNamePrefix STAR_${samplename}
+    else
+        STAR \
+        --runThreadN ${THREADS} \
+        --genomeDir ${REFERENCE} \
+        --sjdbGTFfile ${GFF} \
+        --sjdbGTFtagExonParentTranscript Parent \
+        --sjdbGTFfeatureExon CDS \
+        --twopassMode Basic \
+        --outSAMstrandField intronMotif \
+        --readFilesIn ${OUTPUTDIR}/${basename}_trimmomatic.fastq \
+        --outFileNamePrefix STAR_${samplename}
 
-            #convert the sam file to a bam file
-            samtools view -@ ${THREADS} -bSq 20 ${OUTPUTDIR}/STAR_${samplename}.sam > ${OUTPUTDIR}/STAR_${samplename}.bam
-            #we made the bam and no longer need the sam
-            rm ${OUTPUTDIR}/STAR_${samplename}.sam
-            #sort and index the bam file
-            samtools sort -@ ${THREADS} -m 800M -T ${samplename} -o ${OUTPUTDIR}/STAR_${samplename}.sorted.bam ${OUTPUTDIR}/STAR_${samplename}.bam
-            rm ${OUTPUTDIR}/STAR_${samplename}.bam
-            samtools index ${OUTPUTDIR}/STAR_${samplename}.sorted.bam
-            echo "STAR complete"
+        #convert the sam file to a bam file
+        samtools view -@ ${THREADS} -bSq 20 ${OUTPUTDIR}/STAR_${samplename}Aligned.out.sam > ${OUTPUTDIR}/STAR_${samplename}.bam
+        #we made the bam and no longer need the sam
+        rm STAR_${samplename}Aligned.out.sam
+        #sort and index the bam file
+        samtools sort -@ ${THREADS} -m 800M -T ${samplename} -o ${OUTPUTDIR}/STAR_${samplename}.sorted.bam ${OUTPUTDIR}/STAR_${samplename}.bam
+        rm ${OUTPUTDIR}/STAR_${samplename}.bam
+        samtools index ${OUTPUTDIR}/STAR_${samplename}.sorted.bam
+        echo "STAR complete"
     fi
 fi
 
 
-# #check if the user is using HISAT
-# if [ $ALIGNER == "HISAT" ]
-#    then
-#    echo "starting bowtie2 alignment"
-#    if [ $I == 2 ]
-#       then
-#       bowtie2 -p ${THREADS} \
-#       --rg-id "@RG\tID:wgs_${samplename}" \
-#       -x /panfs/roc/groups/13/stuparr/shared/References/Gmax.a2.v1/assembly/Gmax_275_v2.0 \
-#       -1 ${OUTPUTDIR}/${basename}_trimmomatic.fastq \
-#       -2 ${OUTPUTDIR}/${basename2}_trimmomatic.fastq \
-#       -S ${OUTPUTDIR}/bt2${samplename}.sam
-#       #convert the sam file to a bam file
-#       samtools view -bSq 20 ${OUTPUTDIR}/bt2${samplename}.sam > ${OUTPUTDIR}/bt2${samplename}.bam
-#       #we made the bam and no longer need the sam
-#       rm ${OUTPUTDIR}/bwa${samplename}.sam
-#       #sort and index the bam file
-#       samtools sort -@ ${THREADS} -m 800M ${OUTPUTDIR}/bt2${samplename}.bam ${OUTPUTDIR}/bt2${samplename}.sorted
-#       samtools index ${OUTPUTDIR}/bt2${samplename}.sorted.bam
-#       echo "bowtie2 alignment complete"
-#       else
-#       bowtie2 -p ${THREADS} \
-#       --rg-id "@RG\tID:wgs_${samplename}" \
-#       -x /panfs/roc/groups/13/stuparr/shared/References/Gmax.a2.v1/assembly/Gmax_275_v2.0 \
-#       -1 ${OUTPUTDIR}/${basename}_trimmomatic.fastq \
-#       -S ${OUTPUTDIR}/bt2${samplename}.sam
-#       #convert the sam file to a bam file
-#       samtools view -bSq 20 ${OUTPUTDIR}/bt2${samplename}.sam > ${OUTPUTDIR}/bt2${samplename}.bam
-#       #we made the bam and no longer need the sam
-#       rm ${OUTPUTDIR}/bwa${samplename}.sam
-#       #sort and index the bam file
-#       samtools sort -@ ${THREADS} -m 800M ${OUTPUTDIR}/bt2${samplename}.bam ${OUTPUTDIR}/bt2${samplename}.sorted
-#       samtools index ${OUTPUTDIR}/bt2${samplename}.sorted.bam
-#       echo "bowtie2 alignment complete"
-#    fi
-# fi
+
+if [ $ALIGNER == "HISAT2" ]
+    then
+    HISATREF=${REFERENCE%.fa}
+    echo "starting HISAT alignment"
+    if [ $I == 2 ]
+        then
+        hisat2 \
+        -p ${THREADS} \
+        --min-intronlen 20 \
+        --max-intronlen 20000 \
+        -x ${HISATREF} \
+        -1 ${OUTPUTDIR}/${basename}_trimmomatic.fastq \
+        -2 ${OUTPUTDIR}/${basename2}_trimmomatic.fastq \
+        -S ${OUTPUTDIR}/hisat2_${samplename}.sam \
+        #convert the sam file to a bam file
+        samtools view -@ ${THREADS} -bSq 20 ${OUTPUTDIR}/hisat2_${samplename}.sam > ${OUTPUTDIR}/hisat2_${samplename}.bam
+        #we made the bam and no longer need the sam
+        rm ${OUTPUTDIR}/hisat2_${samplename}.sam
+        #sort and index the bam file
+        samtools sort -@ ${THREADS} -m 800M -T ${samplename} -o ${OUTPUTDIR}/hisat2_${samplename}.sorted.bam ${OUTPUTDIR}/hisat2_${samplename}.bam
+        rm ${OUTPUTDIR}/hisat2_${samplename}.bam
+        samtools index hisat2_${samplename}.sorted.bam
+        echo "STAR complete"
+    else
+        hisat2 \
+        -p ${THREADS} \
+        --min-intronlen 20 \
+        --max-intronlen 20000 \
+        -x ${HISATREF} \
+        -U ${OUTPUTDIR}/${basename}_trimmomatic.fastq \
+        -S ${OUTPUTDIR}/hisat2_${samplename}.sam \
+        #convert the sam file to a bam file
+        samtools view -@ ${THREADS} -bSq 20 ${OUTPUTDIR}/hisat2_${samplename}.sam > ${OUTPUTDIR}/hisat2_${samplename}.bam
+        #we made the bam and no longer need the sam
+        rm ${OUTPUTDIR}/hisat2_${samplename}.sam
+        #sort and index the bam file
+        samtools sort -@ ${THREADS} -m 800M -T ${samplename} -o ${OUTPUTDIR}/hisat2_${samplename}.sorted.bam ${OUTPUTDIR}/hisat2_${samplename}.bam
+        rm ${OUTPUTDIR}/hisat2_${samplename}.bam
+        samtools index hisat2_${samplename}.sorted.bam
+        echo "STAR complete"
+    fi
+fi
+
+#use cufflinks to generate FPKM values
+if [ $ALIGNER == "STAR" ]
+    then
+    cufflinks \
+    -p ${THREADS} \
+    -G ${GFF} \
+    -I 20000 \
+    --min-intron-length 20 \
+    STAR_${samplename}.sorted.bam \
+    -o ${samplename}
+else
+    cufflinks \
+    -p ${THREADS} \
+    -G ${GFF} \
+    -I 20000 \
+    --min-intron-length 20 \
+    hisat2_${samplename}.sorted.bam \
+    -o ${samplename}
+fi
 
 
+
+
+
+#go into the cuff dir
+cd ${samplename}
+
+#rename the files with the sample name in front
+mv genes.fpkm_tracking "${samplename}_genes.fpkm_tracking"
+mv isoforms.fpkm_tracking "${samplename}_isoforms.fpkm_tracking"
+mv skipped.gtf "${samplename}_skipped.gtf"
 
 
