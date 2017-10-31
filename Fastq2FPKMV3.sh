@@ -139,15 +139,14 @@ samplename=$(echo ${basename} | cut -f1 -d"_")
 
 #Quality Checks before running the scripts
 
-
 #check to see that the forward read exists and is readable
-if [ -r $FILE ]
-    then
-    echo "Forward file exists and it readable"
-    else
-    echo "This file is not valid, check to see that is a readable fastq file"
-    exit
-fi
+#if [ -r $FILE ]
+#    then
+#    echo "Forward file exists and it readable"
+#else
+#    echo "$FILE is not valid, check to see that is a readable fastq file"
+#    exit
+#fi
 
 if [ $REFERENCE == "STAR" ]
     then
@@ -173,7 +172,7 @@ if [ -r ${TRIMMOMATIC}/trimmomatic-0.36.jar ]
    then
    echo "Trimmomatic jar file is present"
    else
-   echo "This file is not valid, check to see that the specified directory has the .jar file"
+   echo "$FILE2 is not valid, check to see that the specified directory has the .jar file"
    exit
 fi
 
@@ -260,7 +259,7 @@ if [ $A == "True" ]
             ${OUTPUTDIR}/${basename}_trimmomatic_unpaired.fastq \
             ${OUTPUTDIR}/${basename2}_trimmomatic.fastq \
             ${OUTPUTDIR}/${basename2}_trimmomatic_unpaired.fastq \
-            ILLUMINACLIP:${TRIMMOMATIC}/adapters/${ADAPTER}:2:30:10:4 \
+            ILLUMINACLIP:${TRIMMOMATIC}/adapters/${ADAPTER}:2:30:10:4:TRUE \
             LEADING:3 \
             TRAILING:3 \
             SLIDINGWINDOW:5:20 \
@@ -354,7 +353,7 @@ if [ $ALIGNER == "STAR" ]
         #sort and index the bam file
         samtools sort -@ ${THREADS} -m 800M -T ${samplename} -o ${OUTPUTDIR}/STAR_${samplename}.sorted.bam ${OUTPUTDIR}/STAR_${samplename}.bam
         rm ${OUTPUTDIR}/STAR_${samplename}.bam
-        samtools index ${OUTPUTDIR}/STAR_${samplename}.sorted.bam
+        samtools index -@ ${THREADS} ${OUTPUTDIR}/STAR_${samplename}.sorted.bam
         echo "STAR complete"
     else
         STAR \
@@ -375,7 +374,7 @@ if [ $ALIGNER == "STAR" ]
         #sort and index the bam file
         samtools sort -@ ${THREADS} -m 800M -T ${samplename} -o ${OUTPUTDIR}/STAR_${samplename}.sorted.bam ${OUTPUTDIR}/STAR_${samplename}.bam
         rm ${OUTPUTDIR}/STAR_${samplename}.bam
-        samtools index ${OUTPUTDIR}/STAR_${samplename}.sorted.bam
+        samtools index -@ ${THREADS} ${OUTPUTDIR}/STAR_${samplename}.sorted.bam
         echo "STAR complete"
     fi
 fi
@@ -403,7 +402,7 @@ if [ $ALIGNER == "HISAT2" ]
         #sort and index the bam file
         samtools sort -@ ${THREADS} -m 800M -T ${samplename} -o ${OUTPUTDIR}/hisat2_${samplename}.sorted.bam ${OUTPUTDIR}/hisat2_${samplename}.bam
         rm ${OUTPUTDIR}/hisat2_${samplename}.bam
-        samtools index hisat2_${samplename}.sorted.bam
+        samtools index -@ ${THREADS} hisat2_${samplename}.sorted.bam
         echo "STAR complete"
     else
         hisat2 \
@@ -420,7 +419,7 @@ if [ $ALIGNER == "HISAT2" ]
         #sort and index the bam file
         samtools sort -@ ${THREADS} -m 800M -T ${samplename} -o ${OUTPUTDIR}/hisat2_${samplename}.sorted.bam ${OUTPUTDIR}/hisat2_${samplename}.bam
         rm ${OUTPUTDIR}/hisat2_${samplename}.bam
-        samtools index hisat2_${samplename}.sorted.bam
+        samtools index -@ ${THREADS} hisat2_${samplename}.sorted.bam
         echo "STAR complete"
     fi
 fi
