@@ -172,7 +172,7 @@ if [ -r ${TRIMMOMATIC}/trimmomatic-0.36.jar ]
    then
    echo "Trimmomatic jar file is present"
    else
-   echo "$FILE2 is not valid, check to see that the specified directory has the .jar file"
+   echo "$TRIMMOMATIC is not valid, check to see that the specified directory has the .jar file"
    exit
 fi
 
