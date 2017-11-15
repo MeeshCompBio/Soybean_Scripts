@@ -139,14 +139,14 @@ samplename=$(echo ${basename} | cut -f1 -d"_")
 
 #Quality Checks before running the scripts
 
-#check to see that the forward read exists and is readable
-#if [ -r $FILE ]
-#    then
-#    echo "Forward file exists and it readable"
-#else
-#    echo "$FILE is not valid, check to see that is a readable fastq file"
-#    exit
-#fi
+check to see that the forward read exists and is readable
+if [ -r $FILE ]
+    then
+    echo "Forward file exists and it readable"
+else
+    echo "$FILE is not valid, check to see that is a readable fastq file"
+    exit
+fi
 
 if [ $REFERENCE == "STAR" ]
     then
@@ -187,7 +187,7 @@ fi
 #check same for reverse read if option is flagged
 if [ $I == 2 ]
    then
-   if [ -r $FILE ]
+   if [ -r $FILE2 ]
       then
             echo "Forward file exists and it readable"
             filename2=$(basename "$FILE2")
@@ -197,7 +197,7 @@ if [ $I == 2 ]
             basename2="${filename2%%.*}"
             #basename2="${filename2%%.anqrp.fastq.gz}"
    else
-        echo "This file is not valid, check to see that is a readable fastq file"
+        echo "$FILE2 is not valid, check to see that is a readable fastq file"
         exit
    fi
 fi
