@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 
-#THIS IS A SLIGHTLY MODIFIED VERSION OF THE SCRIPT ORIGINALLY MADE BY Anuj Srivastava
+#THIS IS A SLIGHTLY MODIFIED VERSION OF THE SCRIPT ORIGINALLY MADE BY Anuj Srivastava (there is no github for his code)
 #I modified it so it could take STDIN as input so I could use samtools to stream in a .bam
 #PLEASE CITE ORIGINAL PAPER FOR THIER WORK
 #Srivastava, A., Philip, V. M., Greenstein, I., Rowe, L. B., Barter, M., Lutz, C., &amp; Reinholdt, L. G. (2014).
