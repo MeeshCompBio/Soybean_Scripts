@@ -1,10 +1,5 @@
 #!/bin/bash
 
-#This script takes in your forward reads, reverse reads, 6bp adapter, and output directory and returns
-##all intermitant files with a sorted bam being the final output
-#This script is to version two of the genome.
-
-
 set -euo pipefail
 #use shebang to indicate the path to the interpretor used to execute this script
 #set -e terminated the script if any command exits with a non-zero value
