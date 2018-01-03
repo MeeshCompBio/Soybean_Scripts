@@ -1,4 +1,4 @@
-# Soybean_Scripts
+# NGS_Scripts
 Various scripts that I made to analyze data for the Stupar lab. (Software versions are not listed, but will be added in the near future). Almost all of these scripts were intended to be run in parallel across mutiple nodes using GNU parallel.
 
 ## For new users
