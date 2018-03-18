@@ -12,7 +12,7 @@ set -euo pipefail
 # module load fastqc
 # module load bowtie2
 # module load bwa
-# module load samtools/1.5
+# module load samtools/1.6
 # module load bedtools
 # module load fastqc
 # module load trimmomatic
