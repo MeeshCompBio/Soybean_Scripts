@@ -210,7 +210,7 @@ if [ $A == "True" ]
           -B ${REVERSEADAPTER2} \
           -f fastq \
           -m 40 \
-          -q 30 \
+          -q 20 \
           --quality-base=33 \
           -o ${OUTPUTDIR}/${basename}_cutadapt.fastq \
           -p ${OUTPUTDIR}/${basename2}_cutadapt.fastq \
@@ -229,7 +229,7 @@ if [ $A == "True" ]
           -b AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT \
           -f fastq \
           -m 40 \
-          -q 30 \
+          -q 20 \
           --quality-base=33 \
           -o ${OUTPUTDIR}/${basename}_cutadapt.fastq \
           ${FILE} \
@@ -252,7 +252,7 @@ if [ $A == "False" ]
           -B ${REVERSEADAPTER2} \
           -f fastq \
           -m 40 \
-          -q 30 \
+          -q 20 \
           --quality-base=33 \
           -o ${OUTPUTDIR}/${basename}_cutadapt.fastq \
           -p ${OUTPUTDIR}/${basename2}_cutadapt.fastq \
@@ -270,7 +270,7 @@ if [ $A == "False" ]
           -b AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT \
           -f fastq \
           -m 40 \
-          -q 30 \
+          -q 20 \
           --quality-base=33 \
           -o ${OUTPUTDIR}/${basename}_cutadapt.fastq \
           ${FILE} \
