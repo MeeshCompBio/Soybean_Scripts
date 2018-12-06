@@ -1,6 +1,3 @@
-"""This sctip will take a gff file as input and parce out the longest
-   transcripts  in gff format for formatting for exon mapping"""
-
 import sys
 import getopt
 from collections import OrderedDict
