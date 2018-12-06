@@ -56,7 +56,6 @@ while getopts hf:r:a::t::u::s:v:i::g::o: flag; do
             FILE=$OPTARG
             I=1
             A="False"
-            ALIGNER="STAR"
             THREADS=2
             # hard coded paths are for me, will be overwritten
                 # if other users use the corresponding flag.
