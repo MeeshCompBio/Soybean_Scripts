@@ -1,3 +1,6 @@
+"""This sctip will take a gff file as input and parce out the longest
+   transcripts  in gff format for formatting for exon mapping"""
+
 import sys
 import getopt
 from collections import OrderedDict
@@ -322,8 +325,9 @@ elif Type == "LP":
                         candidate_exon = ts[[x[1:] for x in ts].index(ex)]
                 if counter == size:
                     exon_in_each_ts.append(candidate_exon)
-            # Sort them by exon name
-            exon_in_each_ts = sorted(exon_in_each_ts, key=lambda x: x[0])
+            # Sort them by exon numer at the end of string
+            exon_in_each_ts = sorted(exon_in_each_ts,
+                                     key=lambda x: int(x[0].split(".")[-1]))
 
             return(output_exon(exon_in_each_ts))
 
