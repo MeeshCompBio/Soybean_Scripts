@@ -12,16 +12,16 @@ def usage():
         python3 Parse_GFF_LongestTranscript.py -g <gff_file> -o <output_file>
             -g or gff_file    :The name of the gff file you want to use
             -o or output_file :The name of your GO network object
-            -t or --type      :Scan the gff for low or high proiority (default)
+            -t or --type      :Scan the gff for low or high priority (default)
                                genes. If this flag is used then it will search
                                for low priority genes using raw gff file. High
-                                priority search requires a parsed gff of only
-                                gene and exon fields for whatever transcript
-                                representation you choose. Check out my github
-                                repo https://github.com/MeeshCompBio/Basic_MSI_
-                                Utilities for a script to pull out the longest
-                                representative transcript that can be used on
-                                a raw gff.
+                               priority search requires a parsed gff of only
+                               gene and exon fields for whatever transcript
+                               representation you choose. Check out my github
+                               repo https://github.com/MeeshCompBio/Basic_MSI_
+                               Utilities for a script to pull out the longest
+                               representative transcript that can be used on
+                               a raw gff.
         \n""")
 
 
@@ -196,7 +196,7 @@ if Type == "HP":
                           sep="\t")
 
                 else:
-                    # Take intron/exon boundaries then tile every 150 bp
+                    # Take intron/exon boundaries then tiled every 150 bp
                     mip_exon_idx = 0
                     print(mip_id,
                           gene_chr,
@@ -466,6 +466,7 @@ elif Type == "LP":
                                                        ]
                                                       ]
                     Gff_line_exon[Transcript] = [row]
+    # This is for the last gene/exon information that is stored
     if bool(Transcript_Compare):
         # Return key with largest value
         if len(Transcript_Compare) == 1:
